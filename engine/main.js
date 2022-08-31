@@ -7,6 +7,14 @@ import {
   identifyPlayerMoveablePieces,
 } from "./move.js";
 
+import {
+  identifyJumpablePieces,
+  isFourtheenthJumpAvailable,
+  isMinusFourtheenthJumpAvailable,
+  isEighteenthJumpAvailable,
+  isMinusEighteenthJumpAvailable,
+} from "./jump.js";
+
 const redTurnText = document.querySelectorAll(".red-turn-text");
 const blackTurntext = document.querySelectorAll(".black-turn-text");
 const divider = document.querySelector("#divider");
@@ -19,7 +27,6 @@ let playerPieces;
 let playerMoveablePieces = [];
 let playerJumpablePieces = [];
 let activeCells = [];
-let activeJumpCells = [];
 
 let selectedPiece = {
   id: -1,
@@ -34,18 +41,23 @@ let selectedPiece = {
 };
 
 function init() {
-  //   checkForWin();
+  checkForWin();
+
   playerPieces = getPlayerPieces();
   playerMoveablePieces = identifyPlayerMoveablePieces(playerPieces);
+  playerJumpablePieces = identifyJumpablePieces(playerPieces);
 
-  playerMoveablePieces.forEach((piece) => {
-    signalPieceMoveable(piece);
-    allowPieceClickOption(piece);
-  });
-}
-
-function allowPieceClickOption(piece) {
-  piece.addEventListener("click", triggerPieceClickEvent);
+  if (playerJumpablePieces.length) {
+    playerJumpablePieces.forEach((piece) => {
+      signalPieceMoveable(piece);
+      piece.addEventListener("click", triggerPieceJumpEvent);
+    });
+  } else {
+    playerMoveablePieces.forEach((piece) => {
+      signalPieceMoveable(piece);
+      piece.addEventListener("click", triggerPieceClickEvent);
+    });
+  }
 }
 
 function triggerPieceClickEvent(event) {
@@ -58,6 +70,28 @@ function triggerPieceClickEvent(event) {
   selectedPiece.ninthSpace = isNinthSpaceAvailable(selectedPiece.id);
 
   allowCellsClickOption();
+}
+
+function triggerPieceJumpEvent(event) {
+  reset();
+
+  let piece = event.target;
+  selectedPiece.id = parseInt(piece.id);
+  selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
+  selectedPiece.fourtheenthJumpSpace = isFourtheenthJumpAvailable(
+    selectedPiece.id
+  );
+  selectedPiece.eigtheenthJumpSpace = isEighteenthJumpAvailable(
+    selectedPiece.id
+  );
+  selectedPiece.minusFourtheenthJumpSpace = isMinusFourtheenthJumpAvailable(
+    selectedPiece.id
+  );
+  selectedPiece.minusEigtheenthJumpSpace = isMinusEighteenthJumpAvailable(
+    selectedPiece.id
+  );
+
+  allowCellsJumpOption();
 }
 
 function allowCellsClickOption() {
@@ -90,9 +124,104 @@ function allowCellsClickOption() {
   }
 }
 
-/********************************** */
-/********************************** */
-/********************************** */
+function allowCellsJumpOption() {
+  if (selectedPiece.fourtheenthJumpSpace) {
+    let newBoardIndex = globals.turn
+      ? selectedPiece.indexOfBoard + 14
+      : selectedPiece.indexOfBoard - 14;
+
+    let cell = cells[newBoardIndex];
+
+    let pieceIdToDelete = globals.turn
+      ? board[selectedPiece.indexOfBoard + 7]
+      : board[selectedPiece.indexOfBoard - 7];
+
+    activeCells.push(cell);
+    signalCellClickable(cell);
+
+    cell.onclick = () => {
+      makeMove(
+        selectedPiece.id,
+        selectedPiece.indexOfBoard,
+        newBoardIndex,
+        pieceIdToDelete
+      );
+    };
+  }
+
+  if (selectedPiece.eigtheenthJumpSpace) {
+    let newBoardIndex = globals.turn
+      ? selectedPiece.indexOfBoard + 18
+      : selectedPiece.indexOfBoard - 18;
+
+    let cell = cells[newBoardIndex];
+
+    let pieceIdToDelete = globals.turn
+      ? board[selectedPiece.indexOfBoard + 9]
+      : board[selectedPiece.indexOfBoard - 9];
+
+    activeCells.push(cell);
+    signalCellClickable(cell);
+
+    cell.onclick = () => {
+      makeMove(
+        selectedPiece.id,
+        selectedPiece.indexOfBoard,
+        newBoardIndex,
+        pieceIdToDelete
+      );
+    };
+  }
+
+  if (selectedPiece.minusFourtheenthJumpSpace) {
+    let newBoardIndex = globals.turn
+      ? selectedPiece.indexOfBoard - 14
+      : selectedPiece.indexOfBoard + 14;
+
+    let cell = cells[newBoardIndex];
+
+    let pieceIdToDelete = globals.turn
+      ? board[selectedPiece.indexOfBoard - 7]
+      : board[selectedPiece.indexOfBoard + 7];
+
+    activeCells.push(cell);
+    signalCellClickable(cell);
+
+    cell.onclick = () => {
+      makeMove(
+        selectedPiece.id,
+        selectedPiece.indexOfBoard,
+        newBoardIndex,
+        pieceIdToDelete
+      );
+    };
+  }
+
+  if (selectedPiece.minusEigtheenthJumpSpace) {
+    let newBoardIndex = globals.turn
+      ? selectedPiece.indexOfBoard - 18
+      : selectedPiece.indexOfBoard + 18;
+
+    let cell = cells[newBoardIndex];
+
+    let pieceIdToDelete = globals.turn
+      ? board[selectedPiece.indexOfBoard - 9]
+      : board[selectedPiece.indexOfBoard + 9];
+
+    activeCells.push(cell);
+    signalCellClickable(cell);
+
+    cell.onclick = () => {
+      makeMove(
+        selectedPiece.id,
+        selectedPiece.indexOfBoard,
+        newBoardIndex,
+        pieceIdToDelete
+      );
+    };
+  }
+}
+
 function signalPieceMoveable(piece) {
   piece.style.border = "3px solid #6bda6bbf";
 }
@@ -121,6 +250,27 @@ function switchTurn() {
   }
 }
 
+export function makeMove(
+  pieceId,
+  oldBoardIndex,
+  newBoardIndex,
+  pieceIdToDelete = null
+) {
+  updateUI(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
+  updateData(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
+
+  if (pieceIdToDelete) updateScore();
+
+  playerPieces.forEach((p) => resetSignalPieceMoveable(p));
+  playerMoveablePieces.forEach((piece) => {
+    piece.removeEventListener("click", triggerPieceClickEvent);
+  });
+  playerMoveablePieces = [];
+  reset();
+  switchTurn();
+  init();
+}
+
 function getRedPieces() {
   return document.querySelectorAll("p.red-piece");
 }
@@ -135,16 +285,6 @@ function getPlayerPieces() {
 
   return globals.turn ? redsPieces : blacksPieces;
 }
-
-function resetSignalCellClickable(cell) {}
-
-const resetActiveCells = () => {
-  activeCells.forEach((cell) => {
-    cell.style.backgroundColor = "#BA7A3A";
-    cell.onclick = void 0;
-    activeCells = [];
-  });
-};
 
 function resetSelectedPieceProperties() {
   selectedPiece = {
@@ -165,11 +305,24 @@ function updateScore() {
   blackScore = getBlackPieces().length;
 }
 
-/*
+function reset() {
+  resetSelectedPieceProperties();
+  activeCells.forEach((cell) => {
+    cell.style.backgroundColor = "#BA7A3A";
+    cell.onclick = void 0;
+    activeCells = [];
+  });
+  activeCells.forEach((cell) => {
+    cell.style.backgroundColor = "#BA7A3A";
+    cell.onclick = void 0;
+    activeCells = [];
+  });
+}
+
 function checkForWin() {
   let playerPieces = globals.turn ? getRedPieces() : getBlackPieces();
-  let playerScore = globals.globals.turn ? redScore : blackScore;
-  let loser = globals.globals.turn ? "Red" : "Black";
+  let playerScore = globals.turn ? redScore : blackScore;
+  let loser = globals.turn ? "Red" : "Black";
 
   if (
     playerScore === 0 ||
@@ -178,27 +331,6 @@ function checkForWin() {
   ) {
     if (confirm(loser + " Lost")) document.location.reload();
   }
-}
-*/
-
-function reset() {
-  resetSelectedPieceProperties();
-  resetActiveCells();
-}
-
-export function makeMove(pieceId, oldBoardIndex, newBoardIndex) {
-  updateUI(pieceId, oldBoardIndex, newBoardIndex);
-  updateData(pieceId, oldBoardIndex, newBoardIndex);
-
-  updateScore();
-  playerPieces.forEach((p) => resetSignalPieceMoveable(p));
-  reset();
-  playerMoveablePieces.forEach((piece) => {
-    piece.removeEventListener("click", triggerPieceClickEvent);
-  });
-  playerMoveablePieces = [];
-  switchTurn();
-  init();
 }
 
 init();
