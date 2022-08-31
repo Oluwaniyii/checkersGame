@@ -13,6 +13,7 @@ import {
   isMinusFourtheenthJumpAvailable,
   isEighteenthJumpAvailable,
   isMinusEighteenthJumpAvailable,
+  isPieceJumpable,
 } from "./jump.js";
 
 const redTurnText = document.querySelectorAll(".red-turn-text");
@@ -27,6 +28,7 @@ let playerPieces;
 let playerMoveablePieces = [];
 let playerJumpablePieces = [];
 let activeCells = [];
+let isMultipleJump = false;
 
 let selectedPiece = {
   id: -1,
@@ -259,16 +261,29 @@ export function makeMove(
   updateUI(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
   updateData(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
 
-  if (pieceIdToDelete) updateScore();
+  if (pieceIdToDelete) {
+    if (isPieceJumpable(pieceId)) {
+      isMultipleJump = true;
+      let piece = document.getElementById(pieceId);
 
-  playerPieces.forEach((p) => resetSignalPieceMoveable(p));
-  playerMoveablePieces.forEach((piece) => {
-    piece.removeEventListener("click", triggerPieceClickEvent);
-  });
-  playerMoveablePieces = [];
-  reset();
-  switchTurn();
-  init();
+      signalPieceMoveable(piece);
+      piece.addEventListener("click", triggerPieceJumpEvent);
+      piece.click();
+    } else isMultipleJump = false;
+
+    updateScore();
+  }
+
+  if (!isMultipleJump) {
+    playerPieces.forEach((p) => resetSignalPieceMoveable(p));
+    playerMoveablePieces.forEach((piece) => {
+      piece.removeEventListener("click", triggerPieceClickEvent);
+    });
+    playerMoveablePieces = [];
+    reset();
+    switchTurn();
+    init();
+  }
 }
 
 function getRedPieces() {

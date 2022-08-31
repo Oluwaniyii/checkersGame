@@ -15,7 +15,7 @@ export function identifyJumpablePieces(playerPieces) {
   return jumpablePieces;
 }
 
-const isPieceJumpable = (pieceId) => {
+export function isPieceJumpable(pieceId) {
   let isPieceJumpable = false;
 
   if (isFourtheenthJumpAvailable(pieceId)) isPieceJumpable = true;
@@ -25,7 +25,7 @@ const isPieceJumpable = (pieceId) => {
   if (isMinusEighteenthJumpAvailable(pieceId)) isPieceJumpable = true;
 
   return isPieceJumpable;
-};
+}
 
 export function isFourtheenthJumpAvailable(pieceId) {
   let isPieceJumpable = false;
