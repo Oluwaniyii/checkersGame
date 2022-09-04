@@ -1,4 +1,4 @@
-export const board = [
+export let board = [
   null,
   0,
   null,
@@ -64,9 +64,20 @@ export const board = [
   23,
   null,
 ];
-
-export const cells = document.querySelectorAll("td");
-
-export const globals = {
-  turn: true,
+export let cells = document.querySelectorAll("td");
+export let selectedPiece = {
+  id: -1,
+  indexOfBoard: -1,
+  isKing: false,
+  seventhSpace: false,
+  ninthSpace: false,
+  fourtheenthJumpSpace: false,
+  eigtheenthJumpSpace: false,
+  minusFourtheenthJumpSpace: false,
+  minusEigtheenthJumpSpace: false,
 };
+
+/**
+ * Exported Variables are immutable(const). Using objects helps to work around this problem
+ */
+export let globals = { turn: true };

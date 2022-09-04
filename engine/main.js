@@ -1,5 +1,5 @@
 /*----------- Game State Data ----------*/
-import { board, cells, globals } from "./globals.js";
+import { board, cells, selectedPiece, globals } from "./globals.js";
 import { updateUI, updateData } from "./fn.js";
 import {
   isSeventhSpaceAvailable,
@@ -16,6 +16,8 @@ import {
   isPieceJumpable,
 } from "./jump.js";
 
+import { triggerKingPieceMoveEvent } from "./king.js";
+
 const redTurnText = document.querySelectorAll(".red-turn-text");
 const blackTurntext = document.querySelectorAll(".black-turn-text");
 const divider = document.querySelector("#divider");
@@ -27,25 +29,12 @@ let blackScore = 12;
 let playerPieces;
 let playerMoveablePieces = [];
 let playerJumpablePieces = [];
-let activeCells = [];
+export let activeCells = [];
 let isMultipleJump = false;
 
-let selectedPiece = {
-  id: -1,
-  indexOfBoard: -1,
-  isKing: false,
-  seventhSpace: false,
-  ninthSpace: false,
-  fourtheenthJumpSpace: false,
-  eigtheenthJumpSpace: false,
-  minusFourtheenthJumpSpace: false,
-  minusEigtheenthJumpSpace: false,
-};
-
 function init() {
-  checkForWin();
-
   playerPieces = getPlayerPieces();
+
   playerMoveablePieces = identifyPlayerMoveablePieces(playerPieces);
   playerJumpablePieces = identifyJumpablePieces(playerPieces);
 
@@ -57,21 +46,24 @@ function init() {
   } else {
     playerMoveablePieces.forEach((piece) => {
       signalPieceMoveable(piece);
-      piece.addEventListener("click", triggerPieceClickEvent);
+      if (piece.classList.contains("king"))
+        piece.addEventListener("click", triggerKingPieceMoveEvent);
+      else piece.addEventListener("click", triggerPieceMoveEvent);
     });
   }
 }
 
-function triggerPieceClickEvent(event) {
+function triggerPieceMoveEvent(event) {
   reset();
 
   let piece = event.target;
   selectedPiece.id = parseInt(piece.id);
   selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
+  selectedPiece.isKing = piece.classList.contains("king");
   selectedPiece.seventhSpace = isSeventhSpaceAvailable(selectedPiece.id);
   selectedPiece.ninthSpace = isNinthSpaceAvailable(selectedPiece.id);
 
-  allowCellsClickOption();
+  allowCellMoveClickOption();
 }
 
 function triggerPieceJumpEvent(event) {
@@ -80,6 +72,7 @@ function triggerPieceJumpEvent(event) {
   let piece = event.target;
   selectedPiece.id = parseInt(piece.id);
   selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
+  selectedPiece.isKing = piece.classList.contains("king");
   selectedPiece.fourtheenthJumpSpace = isFourtheenthJumpAvailable(
     selectedPiece.id
   );
@@ -96,7 +89,7 @@ function triggerPieceJumpEvent(event) {
   allowCellsJumpOption();
 }
 
-function allowCellsClickOption() {
+function allowCellMoveClickOption() {
   if (selectedPiece.seventhSpace) {
     const newBoardIndex = globals.turn
       ? selectedPiece.indexOfBoard + 7
@@ -232,7 +225,7 @@ function resetSignalPieceMoveable(piece) {
   piece.style.border = "1px solid #fff";
 }
 
-function signalCellClickable(cell) {
+export function signalCellClickable(cell) {
   cell.style.backgroundColor = "#4c2c2c";
 }
 
@@ -261,7 +254,7 @@ export function makeMove(
   updateUI(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
   updateData(pieceId, oldBoardIndex, newBoardIndex, pieceIdToDelete);
 
-  if (pieceIdToDelete) {
+  if (pieceIdToDelete !== null) {
     if (isPieceJumpable(pieceId)) {
       isMultipleJump = true;
       let piece = document.getElementById(pieceId);
@@ -277,7 +270,7 @@ export function makeMove(
   if (!isMultipleJump) {
     playerPieces.forEach((p) => resetSignalPieceMoveable(p));
     playerMoveablePieces.forEach((piece) => {
-      piece.removeEventListener("click", triggerPieceClickEvent);
+      piece.removeEventListener("click", triggerPieceMoveEvent);
     });
     playerMoveablePieces = [];
     reset();
@@ -302,17 +295,15 @@ function getPlayerPieces() {
 }
 
 function resetSelectedPieceProperties() {
-  selectedPiece = {
-    id: -1,
-    indexOfBoard: -1,
-    isKing: false,
-    seventhSpace: false,
-    ninthSpace: false,
-    fourtheenthJumpSpace: false,
-    eigtheenthJumpSpace: false,
-    minusFourtheenthJumpSpace: false,
-    minusEigtheenthJumpSpace: false,
-  };
+  selectedPiece.id = -1;
+  selectedPiece.indexOfBoard = -1;
+  selectedPiece.isKing = false;
+  selectedPiece.seventhSpace = false;
+  selectedPiece.ninthSpace = false;
+  selectedPiece.fourtheenthJumpSpace = false;
+  selectedPiece.eigtheenthJumpSpace = false;
+  selectedPiece.minusFourtheenthJumpSpace = false;
+  selectedPiece.minusEigtheenthJumpSpace = false;
 }
 
 function updateScore() {
@@ -320,7 +311,7 @@ function updateScore() {
   blackScore = getBlackPieces().length;
 }
 
-function reset() {
+export function reset() {
   resetSelectedPieceProperties();
   activeCells.forEach((cell) => {
     cell.style.backgroundColor = "#BA7A3A";

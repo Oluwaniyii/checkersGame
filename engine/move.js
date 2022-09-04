@@ -1,4 +1,5 @@
 import { board, cells, globals } from "./globals.js";
+import { isKingMovable } from "./king.js";
 
 /**
  *
@@ -24,12 +25,12 @@ export function isNinthSpaceAvailable(pieceId) {
   return isSpaceAvailable(pieceBoardIndex + move);
 }
 
-const isSpaceAvailable = (spaceIndex) => {
+export function isSpaceAvailable(spaceIndex) {
   return (
     board[spaceIndex] === null &&
     cells[spaceIndex].classList.contains("noPieceHere") === false
   );
-};
+}
 
 export function identifyPlayerMoveablePieces(playerPieces) {
   let moveablePieces = [];
@@ -37,9 +38,16 @@ export function identifyPlayerMoveablePieces(playerPieces) {
   for (let i = 0; i < playerPieces.length; i++) {
     let piece = playerPieces[i];
     let pieceId = parseInt(piece.getAttribute("id"));
+    let isKing = piece.classList.contains("king");
 
-    if (isPieceMovable(pieceId)) {
-      moveablePieces.push(piece);
+    if (isKing) {
+      if (isKingMovable(pieceId)) {
+        moveablePieces.push(piece);
+      }
+    } else {
+      if (isPieceMovable(pieceId)) {
+        moveablePieces.push(piece);
+      }
     }
   }
 

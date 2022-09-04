@@ -1,4 +1,4 @@
-import { board, cells, globals } from "./globals.js";
+import { board, cells, selectedPiece, globals } from "./globals.js";
 
 export function updateUI(
   pieceId,
@@ -6,11 +6,13 @@ export function updateUI(
   newBoardIndex,
   pieceIdToDelete
 ) {
-  if (pieceIdToDelete) document.getElementById(pieceIdToDelete).remove();
+  if (pieceIdToDelete !== null)
+    document.getElementById(pieceIdToDelete).remove();
   cells[oldBoardIndex].firstElementChild.remove();
 
   let tagName = globals.turn ? "p" : "span";
   let className = globals.turn ? "red-piece" : "black-piece";
+  className += selectedPiece.isKing ? " king" : "";
 
   const newPiece = document.createElement(tagName);
   newPiece.className = className;
@@ -26,7 +28,7 @@ export function updateData(
   newBoardIndex,
   pieceIdToDelete = null
 ) {
-  if (pieceIdToDelete) board[board.indexOf(pieceIdToDelete)] = null;
+  if (pieceIdToDelete !== null) board[board.indexOf(pieceIdToDelete)] = null;
   board[oldBoardIndex] = null;
   board[newBoardIndex] = pieceId;
 }
