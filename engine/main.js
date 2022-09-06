@@ -29,7 +29,7 @@ const boardLength = 64;
 const middlePieceId = 12;
 let redScore = 12;
 let blackScore = 12;
-let playerPieces;
+let playerPieces = [];
 let playerMoveablePieces = [];
 let playerJumpablePieces = [];
 export let activeCells = [];
@@ -275,12 +275,8 @@ export function makeMove(
   }
 
   if (!isMultipleJump) {
-    playerPieces.forEach((p) => resetSignalPieceMoveable(p));
-    playerMoveablePieces.forEach((piece) => {
-      piece.removeEventListener("click", triggerPieceMoveEvent);
-    });
-    playerMoveablePieces = [];
     reset();
+    fullReset();
     switchTurn();
     init();
   }
@@ -315,12 +311,8 @@ export function makeJump(
   board[board.indexOf(pieceIdToDelete)] = null;
 
   updateScore();
-  playerPieces.forEach((p) => resetSignalPieceMoveable(p));
-  playerJumpablePieces.forEach((p) =>
-    p.removeEventListener("click", triggerKingPieceJumpEvent)
-  );
-  playerJumpablePieces = [];
   reset();
+  fullReset();
   switchTurn();
   init();
 }
@@ -365,6 +357,25 @@ export function reset() {
     cell.onclick = void 0;
     activeCells = [];
   });
+}
+
+function fullReset() {
+  playerJumpablePieces.forEach((piece) => {
+    resetSignalPieceMoveable(piece);
+    if (piece.classList.contains("king"))
+      piece.removeEventListener("click", triggerKingPieceJumpEvent);
+    else piece.removeEventListener("click", triggerPieceJumpEvent);
+  });
+  playerMoveablePieces.forEach((piece) => {
+    resetSignalPieceMoveable(piece);
+    if (piece.classList.contains("king"))
+      piece.removeEventListener("click", triggerKingPieceMoveEvent);
+    else piece.removeEventListener("click", triggerPieceMoveEvent);
+  });
+
+  playerPieces = [];
+  playerMoveablePieces = [];
+  playerJumpablePieces = [];
 }
 
 function checkForWin() {
