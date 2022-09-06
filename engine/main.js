@@ -16,7 +16,10 @@ import {
   isPieceJumpable,
 } from "./jump.js";
 
-import { triggerKingPieceMoveEvent } from "./king.js";
+import {
+  triggerKingPieceMoveEvent,
+  triggerKingPieceJumpEvent,
+} from "./king.js";
 
 const redTurnText = document.querySelectorAll(".red-turn-text");
 const blackTurntext = document.querySelectorAll(".black-turn-text");
@@ -33,6 +36,8 @@ export let activeCells = [];
 let isMultipleJump = false;
 
 function init() {
+  checkForWin();
+
   playerPieces = getPlayerPieces();
 
   playerMoveablePieces = identifyPlayerMoveablePieces(playerPieces);
@@ -41,7 +46,9 @@ function init() {
   if (playerJumpablePieces.length) {
     playerJumpablePieces.forEach((piece) => {
       signalPieceMoveable(piece);
-      piece.addEventListener("click", triggerPieceJumpEvent);
+      if (piece.classList.contains("king")) {
+        piece.addEventListener("click", triggerKingPieceJumpEvent);
+      } else piece.addEventListener("click", triggerPieceJumpEvent);
     });
   } else {
     playerMoveablePieces.forEach((piece) => {
@@ -279,6 +286,45 @@ export function makeMove(
   }
 }
 
+/**
+ * I expect king jump to behave a little differently on multiple jumps which is why it has its dedicated move funtion for now
+ */
+export function makeJump(
+  pieceId,
+  oldBoardIndex,
+  newBoardIndex,
+  pieceIdToDelete
+) {
+  cells[oldBoardIndex].firstElementChild.remove();
+  document.getElementById(pieceIdToDelete).remove();
+
+  let tagName = globals.turn ? "p" : "span";
+  let className = globals.turn ? "red-piece" : "black-piece";
+  className += " king";
+
+  const newPiece = document.createElement(tagName);
+  newPiece.className = className;
+  newPiece.id = pieceId;
+
+  let cell = cells[newBoardIndex];
+  cell.appendChild(newPiece);
+
+  // update data
+  board[oldBoardIndex] = null;
+  board[newBoardIndex] = pieceId;
+  board[board.indexOf(pieceIdToDelete)] = null;
+
+  updateScore();
+  playerPieces.forEach((p) => resetSignalPieceMoveable(p));
+  playerJumpablePieces.forEach((p) =>
+    p.removeEventListener("click", triggerKingPieceJumpEvent)
+  );
+  playerJumpablePieces = [];
+  reset();
+  switchTurn();
+  init();
+}
+
 function getRedPieces() {
   return document.querySelectorAll("p.red-piece");
 }
@@ -313,11 +359,7 @@ function updateScore() {
 
 export function reset() {
   resetSelectedPieceProperties();
-  activeCells.forEach((cell) => {
-    cell.style.backgroundColor = "#BA7A3A";
-    cell.onclick = void 0;
-    activeCells = [];
-  });
+
   activeCells.forEach((cell) => {
     cell.style.backgroundColor = "#BA7A3A";
     cell.onclick = void 0;

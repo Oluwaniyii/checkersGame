@@ -6,7 +6,6 @@ import { isKingMovable } from "./king.js";
  *  A piece can only move to the next seventh or ninth space
  * The back piece in actual moves backwards
  */
-
 export function isPieceMovable(pieceId) {
   return isSeventhSpaceAvailable(pieceId) || isNinthSpaceAvailable(pieceId);
 }

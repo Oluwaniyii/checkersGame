@@ -1,5 +1,11 @@
 import { board, cells, selectedPiece, globals } from "./globals.js";
-import { activeCells, makeMove, signalCellClickable, reset } from "./main.js";
+import {
+  activeCells,
+  makeMove,
+  signalCellClickable,
+  reset,
+  makeJump,
+} from "./main.js";
 import { isSpaceAvailable } from "./move.js";
 
 export function isKingMovable(pieceId) {
@@ -85,4 +91,186 @@ export function triggerKingPieceMoveEvent(e) {
       makeMove(selectedPiece.id, selectedPiece.indexOfBoard, cellIndex);
     };
   });
+}
+
+export function isKingJumpable(pieceId) {
+  let boardIndex = board.indexOf(pieceId);
+  let isJumpable = false;
+
+  let angles = [7, 9, -7, -9];
+
+  for (let i = 0; i < angles.length; i++) {
+    let angle = angles[i];
+    let currentCellIndex = boardIndex;
+
+    if (angle < 0) {
+      while (currentCellIndex > 1) {
+        const status = isSpaceJumpable(currentCellIndex, angle);
+
+        if (status > 2) break;
+
+        if (status === 1) isJumpable = true;
+
+        currentCellIndex += angle;
+      }
+    } else {
+      while (currentCellIndex <= 64) {
+        const status = isSpaceJumpable(currentCellIndex, angle);
+
+        if (status > 2) break;
+
+        if (status === 1) isJumpable = true;
+
+        currentCellIndex += angle;
+      }
+    }
+  }
+
+  return isJumpable;
+}
+
+export function triggerKingPieceJumpEvent(e) {
+  reset();
+
+  selectedPiece.id = parseInt(e.target.id);
+  selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
+  selectedPiece.isKing = true;
+
+  let angles = [7, 9, -7, -9];
+
+  for (let i = 0; i < angles.length; i++) {
+    let angle = angles[i];
+    let currentCellIndex = selectedPiece.indexOfBoard;
+    let isJumpable = false;
+    let deleteId;
+
+    if (angle < 0) {
+      while (currentCellIndex > 1) {
+        const status = isSpaceJumpable(currentCellIndex, angle);
+
+        if (status > 2) break;
+
+        if (status === 1) {
+          isJumpable = true;
+          deleteId = board[currentCellIndex + angle];
+        }
+
+        if (isJumpable && status === 2) {
+          let newBoardIndex = currentCellIndex + angle;
+          let cell = cells[newBoardIndex];
+
+          activeCells.push(cell);
+          signalCellClickable(cell);
+          cell.onclick = () => {
+            makeJump(
+              selectedPiece.id,
+              selectedPiece.indexOfBoard,
+              newBoardIndex,
+              deleteId
+            );
+          };
+        }
+
+        currentCellIndex += angle;
+      }
+    } else {
+      while (currentCellIndex <= 64) {
+        const status = isSpaceJumpable(currentCellIndex, angle);
+
+        if (status > 2) break;
+
+        if (status === 1) {
+          isJumpable = true;
+          deleteId = board[currentCellIndex + angle];
+        }
+
+        if (isJumpable && status === 2) {
+          let newBoardIndex = currentCellIndex + angle;
+          let cell = cells[newBoardIndex];
+
+          activeCells.push(cell);
+          signalCellClickable(cell);
+          cell.onclick = () => {
+            makeJump(
+              selectedPiece.id,
+              selectedPiece.indexOfBoard,
+              newBoardIndex,
+              deleteId
+            );
+          };
+        }
+
+        currentCellIndex += angle;
+      }
+    }
+  }
+}
+
+function isSpaceJumpable(index, angle) {
+  let status = 5;
+  let nextColumn = index + angle;
+  let thirdColumn = index + angle + angle;
+
+  if (globals.turn) {
+    /**
+     * ally piece detected => blocked
+     */
+    if (board[nextColumn] !== null && board[nextColumn] < 12) status = 4;
+
+    /* enemy piece detected but no jump space behind => blocked
+     */
+    if (board[nextColumn] >= 12 && board[thirdColumn] !== null) status = 3;
+
+    /**
+     * empty cell detected
+     */
+    if (
+      board[nextColumn] === null &&
+      cells[nextColumn].classList.contains("noPieceHere") === false
+    )
+      status = 2;
+
+    /**
+     * enemy piece detected with space behind
+     */
+    if (
+      board[nextColumn] !== null &&
+      board[nextColumn] >= 12 &&
+      board[thirdColumn] === null &&
+      cells[thirdColumn].classList.contains("noPieceHere") === false
+    )
+      status = 1;
+  } else {
+    /**
+     * ally piece detected => blocked
+     */
+    if (board[nextColumn] !== null && board[nextColumn] >= 12) status = 4;
+
+    /**
+     * enemy piece detected but no space behind => blocked
+     */
+    if (board[nextColumn] < 12 && board[thirdColumn] !== null) status = 3;
+
+    /**
+     * empty cell detected
+     */
+    if (
+      board[nextColumn] === null &&
+      cells[nextColumn].classList.contains("noPieceHere") === false
+    )
+      status = 2;
+
+    /**
+     * enemy piece detected with space behind
+     */
+    if (
+      board[nextColumn] !== null &&
+      board[nextColumn] < 12 &&
+      board[thirdColumn] === null &&
+      cells[thirdColumn].classList.contains("noPieceHere") === false
+    )
+      status = 1;
+  }
+
+  return status;
 }

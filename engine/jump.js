@@ -1,4 +1,5 @@
 import { board, cells, globals } from "./globals.js";
+import { isKingJumpable } from "./king.js";
 
 export function identifyJumpablePieces(playerPieces) {
   let jumpablePieces = [];
@@ -6,9 +7,14 @@ export function identifyJumpablePieces(playerPieces) {
   for (let i = 0; i < playerPieces.length; i++) {
     let piece = playerPieces[i];
     let pieceId = parseInt(piece.getAttribute("id"));
+    let isKing = piece.classList.contains("king");
 
-    if (isPieceJumpable(pieceId)) {
-      jumpablePieces.push(piece);
+    if (isKing) {
+      if (isKingJumpable(pieceId)) {
+        jumpablePieces.push(piece);
+      }
+    } else {
+      if (isPieceJumpable(pieceId)) jumpablePieces.push(piece);
     }
   }
 
