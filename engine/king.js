@@ -93,11 +93,11 @@ export function triggerKingPieceMoveEvent(e) {
   });
 }
 
-export function isKingJumpable(pieceId) {
-  let boardIndex = board.indexOf(pieceId);
+export function isKingJumpable(pieceId, position = null, anglesList = null) {
+  let boardIndex = position || board.indexOf(pieceId);
   let isJumpable = false;
 
-  let angles = [7, 9, -7, -9];
+  let angles = anglesList || [7, 9, -7, -9];
 
   for (let i = 0; i < angles.length; i++) {
     let angle = angles[i];
@@ -131,11 +131,9 @@ export function isKingJumpable(pieceId) {
 
 export function triggerKingPieceJumpEvent(e) {
   reset();
-
   selectedPiece.id = parseInt(e.target.id);
   selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
   selectedPiece.isKing = true;
-
   let angles = [7, 9, -7, -9];
 
   for (let i = 0; i < angles.length; i++) {
@@ -145,10 +143,14 @@ export function triggerKingPieceJumpEvent(e) {
     let deleteId;
 
     if (angle < 0) {
-      while (currentCellIndex > 1) {
+      let v = [];
+      let isMultipleJump = false;
+
+      while (currentCellIndex > 0) {
         const status = isSpaceJumpable(currentCellIndex, angle);
 
         if (status > 2) break;
+        if (isJumpable && status !== 2) break;
 
         if (status === 1) {
           isJumpable = true;
@@ -156,28 +158,58 @@ export function triggerKingPieceJumpEvent(e) {
         }
 
         if (isJumpable && status === 2) {
-          let newBoardIndex = currentCellIndex + angle;
-          let cell = cells[newBoardIndex];
-
-          activeCells.push(cell);
-          signalCellClickable(cell);
-          cell.onclick = () => {
-            makeJump(
-              selectedPiece.id,
-              selectedPiece.indexOfBoard,
-              newBoardIndex,
-              deleteId
-            );
-          };
+          v.push(currentCellIndex + angle);
         }
 
         currentCellIndex += angle;
       }
+
+      isMultipleJump = checkMultipleJumps(v, angle);
+
+      if (isMultipleJump) {
+        for (let i = 0; i < v.length; i++) {
+          let vi = v[i];
+
+          if (isKingJumpable(null, vi, filterAngles(angle))) {
+            let cell = cells[vi];
+            activeCells.push(cell);
+            signalCellClickable(cell);
+            cell.onclick = () => {
+              makeJump(
+                selectedPiece.id,
+                selectedPiece.indexOfBoard,
+                vi,
+                deleteId,
+                true
+              );
+            };
+          }
+        }
+      } else {
+        for (let i = 0; i < v.length; i++) {
+          let vi = v[i];
+          let cell = cells[vi];
+          activeCells.push(cell);
+          signalCellClickable(cell);
+          cell.onclick = () => {
+            makeJump(
+              selectedPiece.id,
+              selectedPiece.indexOfBoard,
+              vi,
+              deleteId
+            );
+          };
+        }
+      }
     } else {
-      while (currentCellIndex <= 64) {
+      let v = [];
+      let isMultipleJump = false;
+
+      while (currentCellIndex <= 63) {
         const status = isSpaceJumpable(currentCellIndex, angle);
 
         if (status > 2) break;
+        if (isJumpable && status !== 2) break;
 
         if (status === 1) {
           isJumpable = true;
@@ -185,28 +217,53 @@ export function triggerKingPieceJumpEvent(e) {
         }
 
         if (isJumpable && status === 2) {
-          let newBoardIndex = currentCellIndex + angle;
-          let cell = cells[newBoardIndex];
+          v.push(currentCellIndex + angle);
+        }
 
+        currentCellIndex += angle;
+      }
+
+      isMultipleJump = checkMultipleJumps(v, angle);
+
+      if (isMultipleJump) {
+        for (let i = 0; i < v.length; i++) {
+          let vi = v[i];
+          if (isKingJumpable(null, vi, filterAngles(angle))) {
+            let cell = cells[vi];
+            activeCells.push(cell);
+            signalCellClickable(cell);
+            cell.onclick = () => {
+              makeJump(
+                selectedPiece.id,
+                selectedPiece.indexOfBoard,
+                vi,
+                deleteId,
+                true
+              );
+            };
+          }
+        }
+      } else {
+        for (let i = 0; i < v.length; i++) {
+          let vi = v[i];
+          let cell = cells[vi];
           activeCells.push(cell);
           signalCellClickable(cell);
           cell.onclick = () => {
             makeJump(
               selectedPiece.id,
               selectedPiece.indexOfBoard,
-              newBoardIndex,
+              vi,
               deleteId
             );
           };
         }
-
-        currentCellIndex += angle;
       }
     }
   }
 }
 
-function isSpaceJumpable(index, angle) {
+function isSpaceJumpable(index, angle, s = false) {
   let status = 5;
   let nextColumn = index + angle;
   let thirdColumn = index + angle + angle;
@@ -273,4 +330,37 @@ function isSpaceJumpable(index, angle) {
   }
 
   return status;
+}
+
+function filterAngles(usedDirection) {
+  let angles = [7, 9, -7, -9];
+  let angleToRemove;
+
+  switch (usedDirection) {
+    case 7:
+      angleToRemove = -7;
+      break;
+    case 9:
+      angleToRemove = -9;
+      break;
+    case -7:
+      angleToRemove = 7;
+      break;
+    case -9:
+      angleToRemove = 9;
+      break;
+  }
+
+  return angles.filter((angle) => angle !== angleToRemove);
+}
+
+function checkMultipleJumps(v, angle) {
+  let isMultipleJump = false;
+  let angles = filterAngles(angle);
+
+  for (let i = 0; i < v.length; i++) {
+    if (isKingJumpable(null, v[i], angles)) isMultipleJump = true;
+  }
+
+  return isMultipleJump;
 }

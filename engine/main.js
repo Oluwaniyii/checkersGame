@@ -289,7 +289,8 @@ export function makeJump(
   pieceId,
   oldBoardIndex,
   newBoardIndex,
-  pieceIdToDelete
+  pieceIdToDelete,
+  isMultipleJump = false
 ) {
   cells[oldBoardIndex].firstElementChild.remove();
   document.getElementById(pieceIdToDelete).remove();
@@ -310,11 +311,18 @@ export function makeJump(
   board[newBoardIndex] = pieceId;
   board[board.indexOf(pieceIdToDelete)] = null;
 
-  updateScore();
-  reset();
-  fullReset();
-  switchTurn();
-  init();
+  if (isMultipleJump) {
+    console.log("multipleJump");
+    signalPieceMoveable(newPiece);
+    newPiece.addEventListener("click", triggerKingPieceJumpEvent);
+    newPiece.click();
+  } else {
+    updateScore();
+    reset();
+    fullReset();
+    switchTurn();
+    init();
+  }
 }
 
 function getRedPieces() {
