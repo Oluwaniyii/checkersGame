@@ -2,7 +2,6 @@ import { board, cells, globals } from "./globals.js";
 import { isKingMovable } from "./king.js";
 
 /**
- *
  *  A piece can only move to the next seventh or ninth space
  * The back piece in actual moves backwards
  */

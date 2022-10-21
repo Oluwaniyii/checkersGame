@@ -2,11 +2,19 @@ import { board, cells, selectedPiece, globals } from "./globals.js";
 import {
   activeCells,
   makeMove,
-  signalCellClickable,
-  reset,
+  signalCellActive,
+  resetClick,
   makeJump,
 } from "./main.js";
 import { isSpaceAvailable } from "./move.js";
+
+/**
+ *  - The king can move in 4 different directions 7, 9, -7, -9
+ *  - The king piece can move over multiple cells in a chosen direction meaning, all cells in a direction should be moveable except there is a block
+ *  - We have 3 types of block, unjumpable enemy block, an ally piece, or the last cell
+ *  - The highest number of cells is the square-root of total board cells, in this case 64, 8
+ */
+const maxNumberOfCells = 8;
 
 export function isKingMovable(pieceId) {
   const angles = [7, -7, 9, -9];
@@ -14,15 +22,15 @@ export function isKingMovable(pieceId) {
   let isMoveable = false;
 
   /**
-   * Abiding with the rule of fail / return fast
-   * I recogonise a king as moveable if just one move space is available
+   * Declare a king piece as moveable if just one move space is available
    */
   angles.forEach((angle) => {
     let currentCellIndex = boardIndex;
-    let maxCellIndex = currentCellIndex + 8 * angle;
+    let maxCellIndex = currentCellIndex + maxNumberOfCells * angle;
     let newCurrentCellIndex = currentCellIndex + angle;
 
     if (angle < 0) {
+      // angle is negative value
       while (!isMoveable && newCurrentCellIndex > maxCellIndex) {
         let isCellAvailable = isSpaceAvailable(newCurrentCellIndex);
 
@@ -47,7 +55,7 @@ export function isKingMovable(pieceId) {
 }
 
 export function triggerKingPieceMoveEvent(e) {
-  reset();
+  resetClick();
 
   const piece = e.target;
   selectedPiece.id = parseInt(piece.id);
@@ -59,7 +67,7 @@ export function triggerKingPieceMoveEvent(e) {
 
   angles.forEach((angle) => {
     let currentCellIndex = selectedPiece.indexOfBoard;
-    let maxCellIndex = currentCellIndex + 8 * angle;
+    let maxCellIndex = currentCellIndex + maxNumberOfCells * angle;
     let newCellIndex = currentCellIndex + angle;
 
     if (angle < 0) {
@@ -85,7 +93,7 @@ export function triggerKingPieceMoveEvent(e) {
 
   openCells.forEach((cellIndex) => {
     activeCells.push(cells[cellIndex]);
-    signalCellClickable(cells[cellIndex]);
+    signalCellActive(cells[cellIndex]);
 
     cells[cellIndex].onclick = () => {
       makeMove(selectedPiece.id, selectedPiece.indexOfBoard, cellIndex);
@@ -93,11 +101,13 @@ export function triggerKingPieceMoveEvent(e) {
   });
 }
 
-export function isKingJumpable(pieceId, position = null, anglesList = null) {
+export function isKingJumpable(
+  pieceId,
+  position = null,
+  angles = [7, 9, -7, -9]
+) {
   let boardIndex = position || board.indexOf(pieceId);
   let isJumpable = false;
-
-  let angles = anglesList || [7, 9, -7, -9];
 
   for (let i = 0; i < angles.length; i++) {
     let angle = angles[i];
@@ -129,8 +139,14 @@ export function isKingJumpable(pieceId, position = null, anglesList = null) {
   return isJumpable;
 }
 
+/**
+ * A king can move in all angles including reverse direction
+ * Note that we are calculating all possible multipleJumps before hand
+ * therefore when a king "is jumpable" from a certain angle like 'right top'
+ * you don't want include calculations of the same direction otherwise isMultipleJump will always be true
+ */
 export function triggerKingPieceJumpEvent(e) {
-  reset();
+  resetClick();
   selectedPiece.id = parseInt(e.target.id);
   selectedPiece.indexOfBoard = board.indexOf(selectedPiece.id);
   selectedPiece.isKing = true;
@@ -141,11 +157,11 @@ export function triggerKingPieceJumpEvent(e) {
     let currentCellIndex = selectedPiece.indexOfBoard;
     let isJumpable = false;
     let deleteId;
+    let jumpableCellIndexes = [];
+    let isMultipleJump = false;
 
     if (angle < 0) {
-      let v = [];
-      let isMultipleJump = false;
-
+      // angle is negative value
       while (currentCellIndex > 0) {
         const status = isSpaceJumpable(currentCellIndex, angle);
 
@@ -158,53 +174,12 @@ export function triggerKingPieceJumpEvent(e) {
         }
 
         if (isJumpable && status === 2) {
-          v.push(currentCellIndex + angle);
+          jumpableCellIndexes.push(currentCellIndex + angle);
         }
 
         currentCellIndex += angle;
       }
-
-      isMultipleJump = checkMultipleJumps(v, angle);
-
-      if (isMultipleJump) {
-        for (let i = 0; i < v.length; i++) {
-          let vi = v[i];
-
-          if (isKingJumpable(null, vi, filterAngles(angle))) {
-            let cell = cells[vi];
-            activeCells.push(cell);
-            signalCellClickable(cell);
-            cell.onclick = () => {
-              makeJump(
-                selectedPiece.id,
-                selectedPiece.indexOfBoard,
-                vi,
-                deleteId,
-                true
-              );
-            };
-          }
-        }
-      } else {
-        for (let i = 0; i < v.length; i++) {
-          let vi = v[i];
-          let cell = cells[vi];
-          activeCells.push(cell);
-          signalCellClickable(cell);
-          cell.onclick = () => {
-            makeJump(
-              selectedPiece.id,
-              selectedPiece.indexOfBoard,
-              vi,
-              deleteId
-            );
-          };
-        }
-      }
     } else {
-      let v = [];
-      let isMultipleJump = false;
-
       while (currentCellIndex <= 63) {
         const status = isSpaceJumpable(currentCellIndex, angle);
 
@@ -217,47 +192,43 @@ export function triggerKingPieceJumpEvent(e) {
         }
 
         if (isJumpable && status === 2) {
-          v.push(currentCellIndex + angle);
+          jumpableCellIndexes.push(currentCellIndex + angle);
         }
 
         currentCellIndex += angle;
       }
+    }
 
-      isMultipleJump = checkMultipleJumps(v, angle);
+    isMultipleJump = checkMultipleJumps(jumpableCellIndexes, angle);
 
-      if (isMultipleJump) {
-        for (let i = 0; i < v.length; i++) {
-          let vi = v[i];
-          if (isKingJumpable(null, vi, filterAngles(angle))) {
-            let cell = cells[vi];
-            activeCells.push(cell);
-            signalCellClickable(cell);
-            cell.onclick = () => {
-              makeJump(
-                selectedPiece.id,
-                selectedPiece.indexOfBoard,
-                vi,
-                deleteId,
-                true
-              );
-            };
-          }
-        }
-      } else {
-        for (let i = 0; i < v.length; i++) {
-          let vi = v[i];
-          let cell = cells[vi];
+    if (isMultipleJump) {
+      for (let i = 0; i < jumpableCellIndexes.length; i++) {
+        let jci = jumpableCellIndexes[i]; // jci = jumpableCellIndex
+
+        if (isKingJumpable(null, jci, filterAngles(angle))) {
+          let cell = cells[jci];
           activeCells.push(cell);
-          signalCellClickable(cell);
+          signalCellActive(cell);
           cell.onclick = () => {
             makeJump(
               selectedPiece.id,
               selectedPiece.indexOfBoard,
-              vi,
-              deleteId
+              jci,
+              deleteId,
+              true
             );
           };
         }
+      }
+    } else {
+      for (let i = 0; i < jumpableCellIndexes.length; i++) {
+        let jci = jumpableCellIndexes[i];
+        let cell = cells[jci];
+        activeCells.push(cell);
+        signalCellActive(cell);
+        cell.onclick = () => {
+          makeJump(selectedPiece.id, selectedPiece.indexOfBoard, jci, deleteId);
+        };
       }
     }
   }
@@ -354,12 +325,13 @@ function filterAngles(usedDirection) {
   return angles.filter((angle) => angle !== angleToRemove);
 }
 
-function checkMultipleJumps(v, angle) {
+function checkMultipleJumps(jumpableCellIndexes, angle) {
   let isMultipleJump = false;
   let angles = filterAngles(angle);
 
-  for (let i = 0; i < v.length; i++) {
-    if (isKingJumpable(null, v[i], angles)) isMultipleJump = true;
+  for (let i = 0; i < jumpableCellIndexes.length; i++) {
+    if (isKingJumpable(null, jumpableCellIndexes[i], angles))
+      isMultipleJump = true;
   }
 
   return isMultipleJump;

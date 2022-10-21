@@ -21,10 +21,6 @@ import {
   triggerKingPieceJumpEvent,
 } from "./king.js";
 
-const redTurnText = document.querySelectorAll(".red-turn-text");
-const blackTurntext = document.querySelectorAll(".black-turn-text");
-const divider = document.querySelector("#divider");
-
 const boardLength = 64;
 const middlePieceId = 12;
 let redScore = 12;
@@ -39,20 +35,20 @@ function init() {
   checkForWin();
 
   playerPieces = getPlayerPieces();
-
   playerMoveablePieces = identifyPlayerMoveablePieces(playerPieces);
   playerJumpablePieces = identifyJumpablePieces(playerPieces);
+  let isJumpablePiecesAvailable = playerJumpablePieces.length > 0;
 
-  if (playerJumpablePieces.length) {
+  if (isJumpablePiecesAvailable) {
     playerJumpablePieces.forEach((piece) => {
-      signalPieceMoveable(piece);
+      signalPieceActive(piece);
       if (piece.classList.contains("king")) {
         piece.addEventListener("click", triggerKingPieceJumpEvent);
       } else piece.addEventListener("click", triggerPieceJumpEvent);
     });
   } else {
     playerMoveablePieces.forEach((piece) => {
-      signalPieceMoveable(piece);
+      signalPieceActive(piece);
       if (piece.classList.contains("king"))
         piece.addEventListener("click", triggerKingPieceMoveEvent);
       else piece.addEventListener("click", triggerPieceMoveEvent);
@@ -61,7 +57,7 @@ function init() {
 }
 
 function triggerPieceMoveEvent(event) {
-  reset();
+  resetClick();
 
   let piece = event.target;
   selectedPiece.id = parseInt(piece.id);
@@ -74,7 +70,7 @@ function triggerPieceMoveEvent(event) {
 }
 
 function triggerPieceJumpEvent(event) {
-  reset();
+  resetClick();
 
   let piece = event.target;
   selectedPiece.id = parseInt(piece.id);
@@ -104,7 +100,7 @@ function allowCellMoveClickOption() {
 
     let cell = cells[newBoardIndex];
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(selectedPiece.id, selectedPiece.indexOfBoard, newBoardIndex);
@@ -118,7 +114,7 @@ function allowCellMoveClickOption() {
 
     let cell = cells[newBoardIndex];
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(selectedPiece.id, selectedPiece.indexOfBoard, newBoardIndex);
@@ -139,7 +135,7 @@ function allowCellsJumpOption() {
       : board[selectedPiece.indexOfBoard - 7];
 
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(
@@ -163,7 +159,7 @@ function allowCellsJumpOption() {
       : board[selectedPiece.indexOfBoard - 9];
 
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(
@@ -187,7 +183,7 @@ function allowCellsJumpOption() {
       : board[selectedPiece.indexOfBoard + 7];
 
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(
@@ -211,7 +207,7 @@ function allowCellsJumpOption() {
       : board[selectedPiece.indexOfBoard + 9];
 
     activeCells.push(cell);
-    signalCellClickable(cell);
+    signalCellActive(cell);
 
     cell.onclick = () => {
       makeMove(
@@ -224,32 +220,20 @@ function allowCellsJumpOption() {
   }
 }
 
-function signalPieceMoveable(piece) {
+function signalPieceActive(piece) {
   piece.style.border = "3px solid #6bda6bbf";
 }
 
-function resetSignalPieceMoveable(piece) {
+function resetSignalPieceActive(piece) {
   piece.style.border = "1px solid #fff";
 }
 
-export function signalCellClickable(cell) {
+export function signalCellActive(cell) {
   cell.style.backgroundColor = "#4c2c2c";
 }
 
 function switchTurn() {
   globals.turn = !globals.turn;
-
-  if (globals.turn) {
-    for (let i = 0; i < redTurnText.length; i++) {
-      redTurnText[i].style.color = "lightGrey";
-      blackTurntext[i].style.color = "black";
-    }
-  } else {
-    for (let i = 0; i < blackTurntext.length; i++) {
-      blackTurntext[i].style.color = "lightGrey";
-      redTurnText[i].style.color = "black";
-    }
-  }
 }
 
 export function makeMove(
@@ -266,7 +250,7 @@ export function makeMove(
       isMultipleJump = true;
       let piece = document.getElementById(pieceId);
 
-      signalPieceMoveable(piece);
+      signalPieceActive(piece);
       piece.addEventListener("click", triggerPieceJumpEvent);
       piece.click();
     } else isMultipleJump = false;
@@ -275,7 +259,8 @@ export function makeMove(
   }
 
   if (!isMultipleJump) {
-    reset();
+    updateScore();
+    resetClick();
     fullReset();
     switchTurn();
     init();
@@ -312,13 +297,12 @@ export function makeJump(
   board[board.indexOf(pieceIdToDelete)] = null;
 
   if (isMultipleJump) {
-    console.log("multipleJump");
-    signalPieceMoveable(newPiece);
+    signalPieceActive(newPiece);
     newPiece.addEventListener("click", triggerKingPieceJumpEvent);
     newPiece.click();
   } else {
     updateScore();
-    reset();
+    resetClick();
     fullReset();
     switchTurn();
     init();
@@ -334,10 +318,7 @@ function getBlackPieces() {
 }
 
 function getPlayerPieces() {
-  let redsPieces = getRedPieces();
-  let blacksPieces = getBlackPieces();
-
-  return globals.turn ? redsPieces : blacksPieces;
+  return globals.turn ? getRedPieces() : getBlackPieces();
 }
 
 function resetSelectedPieceProperties() {
@@ -357,7 +338,7 @@ function updateScore() {
   blackScore = getBlackPieces().length;
 }
 
-export function reset() {
+export function resetClick() {
   resetSelectedPieceProperties();
 
   activeCells.forEach((cell) => {
@@ -369,13 +350,13 @@ export function reset() {
 
 function fullReset() {
   playerJumpablePieces.forEach((piece) => {
-    resetSignalPieceMoveable(piece);
+    resetSignalPieceActive(piece);
     if (piece.classList.contains("king"))
       piece.removeEventListener("click", triggerKingPieceJumpEvent);
     else piece.removeEventListener("click", triggerPieceJumpEvent);
   });
   playerMoveablePieces.forEach((piece) => {
-    resetSignalPieceMoveable(piece);
+    resetSignalPieceActive(piece);
     if (piece.classList.contains("king"))
       piece.removeEventListener("click", triggerKingPieceMoveEvent);
     else piece.removeEventListener("click", triggerPieceMoveEvent);

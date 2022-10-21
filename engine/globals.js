@@ -78,6 +78,6 @@ export let selectedPiece = {
 };
 
 /**
- * Exported Variables are immutable(const). Using objects helps to work around this problem
+ * Exported Variables are immutable(const) by default. Using objects helps to be able to update the variable
  */
 export let globals = { turn: true };
