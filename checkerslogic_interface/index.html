@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="./css/style.css" />
+  <script src="./engine/main.js" defer type="module"></script>
+
+  <title>Checkers</title>
+</head>
+<body>
+  <main>
+    <table>
+      <!-- Black Row 1 -->
+      <tr>
+        <td class="noPieceHere"></td>
+        <td>
+          <div class="piece dark-piece" id="0">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="1">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+        <td>
+          <div class="piece dark-piece" id="2">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+        <td>
+          <div class="piece dark-piece" id="3">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+      </tr>
+      <!-- Black Row 2-->
+      <tr>
+        <td>
+          <div class="piece dark-piece" id="4">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="5">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="6">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="7">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+      </tr>
+      <!-- Black Row 3 -->
+      <tr>
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="8">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="9">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece" id="10">
+            <img class="piece-img" src="../assets/carrombrown.png" alt="">
+          </div>
+        </td>
+
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece dark-piece king" id="11">
+            <img class="piece-img" src="../assets/carrombrownkinggold.png" alt="">
+          </div>
+        </td>
+      </tr>
+      <!-- Empty rows -->
+      <tr>
+        <!-- <td class="highlight"></td> -->
+        <td></td>
+        <td class="noPieceHere"></td>
+        <td></td>
+        <td class="noPieceHere"></td>
+        <td></td>
+        <td class="noPieceHere"></td>
+        <td></td>
+        <td class="noPieceHere"></td>
+      </tr>
+      <tr>
+        <td class="noPieceHere"></td>
+        <!-- <td></td> -->
+        <td></td>
+
+        <td class="noPieceHere"></td>
+        <td></td>
+        <td class="noPieceHere"></td>
+        <td></td>
+        <td class="noPieceHere"></td>
+        <td></td>
+      </tr>
+      <!-- Empty rows -->
+      <!-- White Row 1-->
+      <tr>
+        <td>
+          <div class="piece light-piece" id="12">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="13">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="14">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="15">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+      </tr>
+      <!-- White Row 2-->
+      <tr>
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="16">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="17">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="18">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="19">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+      </tr>
+      <!-- White Row 3-->
+      <tr>
+        <td>
+          <div class="piece light-piece" id="20">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="21">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="22">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+
+        <td>
+          <div class="piece light-piece" id="23">
+            <img class="piece-img" src="../assets/carromcream.png" alt="">
+          </div>
+        </td>
+
+        <td class="noPieceHere"></td>
+      </tr>
+    </table>
+    <div class="desktop">
+    </div>
+  </main>
+</body>
+</html>
