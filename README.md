@@ -2,9 +2,7 @@
 
 Dedicated repo for checkersLounge bare game logic
 
-<img src="
-https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1666348749/projectfiles/checkersLounge/ezgif.com-gif-maker_f7SQuHqP4_nboafh.gif
-" alt="checkersgame gif" />
+<img src="https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1666348749/projectfiles/checkersLounge/ezgif.com-gif-maker_f7SQuHqP4_nboafh.gif" alt="checkersgame gif" />
 
 <br />
 
@@ -14,9 +12,7 @@ https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1666348749/projec
 
 This branch uses the old minimal ui , this is to focus on the bare game logic, game performance and for easier introduction of new functionalities
 
-<img src="
-https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1667302126/projectfiles/checkersLounge/Screenshot_565_wovn3j.png
-" alt="checkersgame plain" />
+<img src="https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1667302126/projectfiles/checkersLounge/Screenshot_565_wovn3j.png" alt="checkersgame plain" />
 
 <u><h3> checkerslogic_interface</h3></u>
 
