@@ -11,7 +11,7 @@ export function updateUI(
   cells[oldBoardIndex].firstElementChild.remove();
 
   /**
-   * When a piece gets to the opponet's last role, crown it king
+   * When a piece gets to the opponent's last row, crown it king
    */
   if (globals.turn && newBoardIndex > 55) selectedPiece.isKing = true;
   if (!globals.turn && newBoardIndex < 8) selectedPiece.isKing = true;
