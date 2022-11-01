@@ -1,3 +1,6 @@
+/**
+ * The representaiton of game board state in form of an array
+ */
 export let board = [
   null,
   0,
