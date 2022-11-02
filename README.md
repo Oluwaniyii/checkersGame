@@ -2,7 +2,7 @@
 
 Dedicated repo for checkersLounge bare game logic
 
-![Untitled](https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1666348749/projectfiles/checkersLounge/ezgif.com-gif-maker_f7SQuHqP4_nboafh.gif)
+![untitled](https://res.cloudinary.com/longbotton-cloudinary/image/upload/v1666348749/projectfiles/checkersLounge/ezgif.com-gif-maker_f7SQuHqP4_nboafh.gif)
 
 <br />
 
